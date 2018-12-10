@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="stylesheet.css">
+    <title>Animal Buttons</title>
+</head>
+
+<body>
+    <div id="button-container"></div>
+    <div id="gifs-appear-here">
+    </div>
+    <form id="search-form">
+        <label for ="search-input">Search for an animal</label>
+        <input type="text" id="search-input"><br>
+        <input type="submit" value="Submit">
+    </form>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        var buttons = ['Goats', 'Cows', 'Cats', 'Squirrels', 'Skunks', 'Pigs', 'Horses'];
+        renderButtons();
+        $("#button-container").on("click", ".btn-click", function () {
+            var animal = $(this).attr("data-animal");
+            var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+                animal + "&api_key=dc6zaTOxFJmzC&limit=20";
+
+            $.ajax({
+                url: queryURL,
+                method: "GET"
+            }).then(function (response) {
+                // Step 1: Run this file, click a button, and see what the response object looks like in the browser's console.
+                // Open up the data key, then open up the 0th, element. Study the keys and how the JSON is structured.
+
+                console.log(response);
+
+                // Step 2: since the image information is inside of the data key,
+                // make a variable named results and set it equal to response.data
+                var gifData = response.data; //data of results
+
+                renderGifs(gifData);
+                // });
+            });
+        });
+        $("#gifs-appear-here").on("click", ".gifs", function () {
+            console.log("gifs state change");
+            var state = $(this).attr('data-state');
+            if (state === "still") {
+                $(this).attr("src", $(this).attr("data-gif"));
+                $(this).attr("data-state", "animate");
+            }
+            else {
+                    $(this).attr("src", $(this).attr("data-still"));
+                    $(this).attr("data-state", "still");
+            }                     
+
+        });
+        function renderButtons() {
+            $('#button-container').empty();
+            for (var i = 0; i < buttons.length; i++) {
+                var newButton = '<button class="btn-click" data-animal="' + buttons[i] + '">' + buttons[i] + '</button>';
+                $('#button-container').append(newButton);
+            }
+        }
+
+        function renderGifs(results) {
+            $("#gifs-appear-here").empty();
+
+            for (var i = 0; i < results.length; i++) {
+
+                // Step 3: uncomment the for loop above and the closing curly bracket below.
+                // Make a div with jQuery and store it in a variable named animalDiv.
+
+                var animalDiv = $("<div>");
+
+                // Make a paragraph tag with jQuery and store it in a variable named p.
+                var p = $("<p>").text("Rating: " + results[i].rating);
+                // Set the inner text of the paragraph to the rating of the image in results[i].
+                // Make an image tag with jQuery and store it in a variable named animalImage.
+
+                var animalImage = $("<img>").attr("src", results[i].images.fixed_height_still.url);
+                animalImage.attr('data-state', 'still');
+                animalImage.attr('data-gif', results[i].images.fixed_height.url);
+                animalImage.attr('data-still', results[i].images.fixed_height_still.url);
+                animalImage.addClass("gifs");
+               
+                console.log("fixed-height-url", results[i].images.fixed_height.url);
+                console.log("fixed height still", results[i].images.fixed_height_still.url);
+               
+                // Set the image's src to results[i]'s fixed_height.url.
+                // Append the p variable to the animalDiv variable.
+                animalDiv.append(p, animalImage);
+                // Append the animalImage variable to the animalDiv variable.
+                // Prepend the animalDiv variable to the element with an id of gifs-appear-here.
+                $("#gifs-appear-here").append(animalDiv);
+                           
+
+            }
+        }
+
+
+
+    </script>
+</body>
+
+</html>
